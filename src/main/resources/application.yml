@@ -1,12 +1,11 @@
 spring:
   application:
-    name: sbb
+    name: p-63-260804
   output:
     ansi:
       enabled: always
   profiles:
     active: dev
-
   jpa:
     properties:
       hibernate:
