@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class QuestionRepositoryTest {
 
 	@Autowired
@@ -28,6 +29,8 @@ class QuestionRepositoryTest {
 	@DisplayName("findAll")
 	void t1() {
 		List<Question> all = this.questionRepository.findAll();
+		// select * from question;
+
 		assertEquals(2, all.size());
 
 		Question q = all.get(0);
@@ -38,7 +41,7 @@ class QuestionRepositoryTest {
 	@DisplayName("findById")
 	void t2() {
 		Optional<Question> oq = this.questionRepository.findById(1);
-
+		// select * from question where id = 1
 		if(oq.isPresent()) {
 			Question q = oq.get();
 			assertEquals("sbb가 무엇인가요?", q.getSubject());
@@ -49,6 +52,7 @@ class QuestionRepositoryTest {
 	@DisplayName("findBySubject")
 	void t3() {
 		Question q = this.questionRepository.findBySubject("sbb가 무엇인가요?").get();
+		// select * from question where subject = 'sbb가 무엇인가요?'
 		assertEquals(1, q.getId());
 	}
 
@@ -70,10 +74,10 @@ class QuestionRepositoryTest {
 
 	@Test
 	@DisplayName("데이터 수정")
-	@Transactional
 	void t6() {
 		Optional<Question> oq = this.questionRepository.findById(1);
 		assertTrue(oq.isPresent());
+//        assertThat(oq.get().getSubject()).isEqualTo("sbb가 무엇인가요?");
 		Question q = oq.get();
 		q.setSubject("수정된 제목");
 
@@ -98,6 +102,7 @@ class QuestionRepositoryTest {
 
 	@Test
 	@DisplayName("답변 데이터 생성")
+	@Transactional
 	void t8() {
 		Question question = this.questionRepository.findById(2).get();
 
@@ -108,7 +113,40 @@ class QuestionRepositoryTest {
 		this.answerRepository.save(a);
 	}
 
+	@Test
+	@DisplayName("답변 데이터 생성2")
+	@Transactional
+	void t9() {
+		Question question2 = questionRepository.findById(2).get();
 
+		Answer answer = new Answer();
+		answer.setContent("답변 내용");
+		answer.setQuestion(question2);
+		answer.setCreateDate(LocalDateTime.now());
 
+		question2.getAnswers().add(answer);
+		questionRepository.save(question2);
 
+		questionRepository.flush();
+
+		Answer answer2 = answerRepository.findById(2).get();
+		assertEquals(1, this.answerRepository.count());
+		assertEquals("답변 내용", answer2.getContent());
+	}
+
+	@Test
+	@DisplayName("답변 데이터 생성3")
+	@Transactional
+	void t10() {
+		Question question2 = questionRepository.findById(2).get();
+
+		question2.addAnswer("답변 내용");
+		questionRepository.save(question2);
+
+		questionRepository.flush();
+
+		Answer answer2 = answerRepository.findById(3).get();
+		assertEquals(1, this.answerRepository.count());
+		assertEquals("답변 내용", answer2.getContent());
+	}
 }
