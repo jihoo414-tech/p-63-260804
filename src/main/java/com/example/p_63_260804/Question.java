@@ -28,7 +28,18 @@ public class Question {
 
 
     // cascade = CascadeType.REMOVE를 적으면 question을 remove하면 answer도 자동으로 remove됨
-    @OneToMany(mappedBy = "question",cascade = CascadeType.REMOVE)// mappedBy가 붙은 쪽은 외래키를 만들지 않고 반대쪽에 만든다.
+    // cascade CascadeType.PERSIST를 적용하면, answer을 더하면, answerRepository에 자동으로 반영
+    @OneToMany(mappedBy = "question",cascade = {CascadeType.PERSIST, CascadeType.REMOVE})// mappedBy가 붙은 쪽은 외래키를 만들지 않고 반대쪽에 만든다.
     private List<Answer> answers = new ArrayList<>();
+
+    public void addAnswer(){
+        Answer answer = new Answer();
+        answer.setContent("답변 내용");
+        answer.setQuestion(this);
+
+        this.answers.add(answer);
+
+
+    }
 
 }
